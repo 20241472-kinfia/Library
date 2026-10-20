@@ -1,0 +1,37 @@
+﻿@using library.Models
+@model Member
+@{
+    ViewData["Name"] = "Add a member";
+}
+
+<h1 class="mb-3">Add a member</h1>
+
+<form asp-action="Create" method="post" class="card card-body" style="max-width:36rem">
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select">
+            <option value="">(none)</option>
+            <option>Regular</option>
+            <option>Student</option>
+            <option>Faculty</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-link">Cancel</a>
+    </div>
+</form>
