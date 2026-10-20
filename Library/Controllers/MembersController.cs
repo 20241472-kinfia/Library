@@ -40,7 +40,7 @@ public class MembersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // GET /Members/Edit/5 : the form, filled with book 5.
+    // GET /Members/Edit/5 : the form, filled with member 5.
     public async Task<IActionResult> Edit(long id)
     {
         var member = await _members.GetByIdAsync(id);

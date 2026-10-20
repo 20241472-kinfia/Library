@@ -24,6 +24,8 @@ public partial class Program
 
         builder.Services.AddScoped<MemberRepository>();
 
+        builder.Services.AddScoped<NoteRepository>();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
