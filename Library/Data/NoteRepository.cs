@@ -21,16 +21,16 @@ public class NoteRepository
         {
             NoteId = reader.GetInt64(0),
             Title = reader.GetString(1),
-            Body = reader.GetString(2),
-            Date = reader.GetString(3),
+            Body = reader.IsDBNull(2) ? "" : reader.GetString(2),
+            Date = reader.GetFieldValue<DateOnly>(3),
         };
     }
 
     // CREATE: insert a new note. The database chooses its note_id.
     public async Task AddAsync(Note note)
     {
-        const string sql = "INSERT INTO lending.note (note_id, title, body, created_on) " +
-                           "VALUES (@title, @Body, @date);";
+        const string sql = "INSERT INTO lending.note ( title, body, created_on) " +
+                           "VALUES (@title, @body, @date);";
 
         await using var command = _dataSource.CreateCommand(sql);
         command.Parameters.AddWithValue("title", note.Title);
@@ -43,7 +43,7 @@ public class NoteRepository
     // READ: every note, sorted by name.
     public async Task<List<Note>> GetAllAsync()
     {
-        const string sql = "SELECT note_id, title, body, created_on FROM lending.note ORDER BY title;";
+        const string sql = "SELECT note_id, title, body, created_on FROM lending.note ORDER BY note_id;";
 
         var notes = new List<Note>();
 
@@ -62,7 +62,7 @@ public class NoteRepository
     // READ: one note, or null when no note has that id.
     public async Task<Note?> GetByIdAsync(long id)
     {
-        const string sql = "SELECT note, title, body, created_on FROM lending.note WHERE note_id = @id;";
+        const string sql = "SELECT note_id, title, body, created_on FROM lending.note WHERE note_id = @id;";
 
         await using var command = _dataSource.CreateCommand(sql);
         command.Parameters.AddWithValue("id", id);

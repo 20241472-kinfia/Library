@@ -19,7 +19,7 @@
             <th>Name</th>
             <th>Type</th>
             <th>Email</th>
-            <th class="text-end">Date</th>
+            <th class="text-end">Date Joined</th>
             <th style="width:10rem"></th>
         </tr>
     </thead>
@@ -29,9 +29,9 @@
             <tr>
                 <td class="text-end">@member.MemberId</td>
                 <td>@member.Name</td>
-                <td><span class="badge text-bg-secondary">@(member.Type?? "—")</span></td>
+                <td><span class="badge text-bg-secondary">@(member.Type ?? "—")</span></td>
                 <td><span class="badge text-bg-secondary">@(member.Email ?? "—")</span></td>
-                @*@<td class="text-end">@(member.Date?.ToString("N2") ?? "—")</td>*@
+                <td><span class="badge text-bg-secondary">@(member.Date)</span></td>
                 <td class="text-end">
                     <a asp-action="Edit" asp-route-id="@member.MemberId" class="btn btn-sm btn-outline-secondary">Edit</a>
 
