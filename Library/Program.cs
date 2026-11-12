@@ -24,6 +24,8 @@ public partial class Program
 
         builder.Services.AddScoped<MemberRepository>();
 
+        builder.Services.AddScoped<LoanRepository>();
+
         builder.Services.AddScoped<NoteRepository>();
 
         var app = builder.Build();
