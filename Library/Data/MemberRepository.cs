@@ -23,8 +23,7 @@ public class MemberRepository
             MemberId = reader.GetInt64(0),
             Name = reader.GetString(1),
             Type = reader.GetString(2), 
-            Email = reader.IsDBNull(3) ? null : reader.GetString(3),
-            Date = reader.GetFieldValue<DateOnly>(4),
+            Email = reader.IsDBNull(3) ? null : reader.GetString(3)
         };
     }
 
@@ -39,34 +38,37 @@ public class MemberRepository
         command.Parameters.AddWithValue("type", member.Type);
         // A C# null must be sent as DBNull.Value, which is how a database NULL is written.
         command.Parameters.AddWithValue("email", (object?)member.Email ?? DBNull.Value);
-        command.Parameters.AddWithValue("join_date", member.Date);
-
         await command.ExecuteNonQueryAsync();           // runs SQL that returns no rows
     }
 
-    // READ: every member, sorted by name.
+    // READ: every member, with how many books each has out now.
     public async Task<List<Member>> GetAllAsync()
     {
-        const string sql = "SELECT member_id, full_name, member_type, email, join_date FROM lending.member ORDER BY member_id;";
+        const string sql =
+    "SELECT m.member_id, m.full_name, m.member_type, m.email, COUNT(l.loan_id) " +
+    "FROM lending.member m " +
+    "LEFT JOIN lending.loan l ON l.member_id = m.member_id AND l.returned_on IS NULL " +
+    "GROUP BY m.member_id " +
+    "ORDER BY m.full_name;";
 
         var members = new List<Member>();
-
-        // The command borrows a connection; 'await using' gives it back when the method ends.
         await using var command = _dataSource.CreateCommand(sql);
         await using var reader = await command.ExecuteReaderAsync();
-
-        while (await reader.ReadAsync())        // once for each row
+        while (await reader.ReadAsync())
         {
-            members.Add(ReadMember(reader));
+            var member = ReadMember(reader);
+            member.OpenLoans = reader.GetInt64(4);
+            members.Add(member);
         }
 
         return members;
     }
 
+
     // READ: one member, or null when no member has that id.
     public async Task<Member?> GetByIdAsync(long id)
     {
-        const string sql = "SELECT member_id, full_name, member_type, email, join_date FROM lending.member WHERE member_id = @id;";
+        const string sql = "SELECT member_id, full_name, member_type, email FROM lending.member WHERE member_id = @id;";
 
         await using var command = _dataSource.CreateCommand(sql);
         command.Parameters.AddWithValue("id", id);      // @id in the SQL receives this value
@@ -79,7 +81,7 @@ public class MemberRepository
     public async Task UpdateAsync(Member member)
     {
         const string sql = "UPDATE lending.member " +
-                           "SET full_name = @name, member_type = @type, email = @email , join_date = @date" +
+                           "SET full_name = @name, member_type = @type, email = @email" +
                            "WHERE member_id = @id;";
 
         await using var command = _dataSource.CreateCommand(sql);
@@ -87,8 +89,6 @@ public class MemberRepository
         command.Parameters.AddWithValue("name", member.Name);
         command.Parameters.AddWithValue("type", member.Type);
         command.Parameters.AddWithValue("email", (object?)member.Email ?? DBNull.Value);
-        command.Parameters.AddWithValue("join_date", member.Date);
-
         await command.ExecuteNonQueryAsync();
     }
 
@@ -102,7 +102,6 @@ public class MemberRepository
 
         await command.ExecuteNonQueryAsync();
     }
-
 
 
 }
